@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BidFlow AI CRM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4F46E5;
+      --sidebar-width: 250px;
+    }
+    
+    body {
+      background-color: #f5f7fa;
+    }
+    
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+      color: white;
+      padding: 20px 0;
+      z-index: 1000;
+    }
+    
+    .sidebar-brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 0 20px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .sidebar-menu {
+      list-style: none;
+      padding: 20px 0;
+      margin: 0;
+    }
+    
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .sidebar-menu li a:hover,
+    .sidebar-menu li a.active {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border-left: 3px solid var(--primary-color);
+    }
+    
+    .sidebar-menu i {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+    
+    .stat-card .icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .stat-card .icon.blue { background: #dbeafe; color: #2563eb; }
+    .stat-card .icon.green { background: #dcfce7; color: #16a34a; }
+    .stat-card .icon.purple { background: #f3e8ff; color: #9333ea; }
+    .stat-card .icon.orange { background: #ffedd5; color: #ea580c; }
+    
+    .stat-card .value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1f2937;
+    }
+    
+    .stat-card .label {
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+    
+    .content-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .content-card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .content-card-body {
+      padding: 24px;
+    }
+    
+    .table th {
+      font-weight: 600;
+      color: #6b7280;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .badge-stage {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .badge-prospecting { background: #dbeafe; color: #1e40af; }
+    .badge-qualification { background: #fef3c7; color: #92400e; }
+    .badge-proposal { background: #e0e7ff; color: #3730a3; }
+    .badge-negotiation { background: #fce7f3; color: #9d174d; }
+    .badge-closed_won { background: #dcfce7; color: #166534; }
+    .badge-closed_lost { background: #fee2e2; color: #991b1b; }
+    
+    .pipeline-stage {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 200px;
+    }
+    
+    .pipeline-stage-title {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .deal-card {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+    
+    .deal-card:hover {
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .deal-amount {
+      font-weight: bold;
+      color: #1f2937;
+    }
+    
+    .btn-primary {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-primary:hover {
+      background: #4338ca;
+      border-color: #4338ca;
+    }
+    
+    .view-section {
+      display: none;
+    }
+    
+    .view-section.active {
+      display: block;
+    }
+    
+    .modal-header {
+      background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+      color: white;
+    }
+    
+    .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <i class="bi bi-graph-up-arrow me-2"></i>
+      BidFlow CRM
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#" class="active" data-view="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li><a href="#" data-view="companies"><i class="bi bi-building"></i> Empresas</a></li>
+      <li><a href="#" data-view="contacts"><i class="bi bi-people"></i> Contactos</a></li>
+      <li><a href="#" data-view="deals"><i class="bi bi-currency-dollar"></i> Oportunidades</a></li>
+      <li><a href="#" data-view="activities"><i class="bi bi-calendar-check"></i> Actividades</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Dashboard View -->
+    <div id="dashboard-view" class="view-section active">
+      <h2 class="mb-4">Dashboard</h2>
+      
+      <div class="row g-4 mb-4">
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="label mb-1">Contactos</div>
+                <div class="value" id="stat-contacts">0</div>
+              </div>
+              <div class="icon blue"><i class="bi bi-people"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="label mb-1">Empresas</div>
+                <div class="value" id="stat-companies">0</div>
+              </div>
+              <div class="icon green"><i class="bi bi-building"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="label mb-1">Oportunidades</div>
+                <div class="value" id="stat-deals">0</div>
+              </div>
+              <div class="icon purple"><i class="bi bi-currency-dollar"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="label mb-1">Actividades</div>
+                <div class="value" id="stat-activities">0</div>
+              </div>
+              <div class="icon orange"><i class="bi bi-calendar-check"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-8">
+          <div class="content-card">
+            <div class="content-card-header">
+              <h5 class="mb-0">Pipeline de Ventas</h5>
+            </div>
+            <div class="content-card-body">
+              <div id="pipeline-container" class="row g-3"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="content-card">
+            <div class="content-card-header">
+              <h5 class="mb-0">Actividades Recientes</h5>
+            </div>
+            <div class="content-card-body">
+              <div id="recent-activities"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Companies View -->
+    <div id="companies-view" class="view-section">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Empresas</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#companyModal">
+          <i class="bi bi-plus-lg me-1"></i> Nueva Empresa
+        </button>
+      </div>
+      <div class="content-card">
+        <div class="content-card-body">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Industria</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Ciudad</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="companies-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacts View -->
+    <div id="contacts-view" class="view-section">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Contactos</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal">
+          <i class="bi bi-plus-lg me-1"></i> Nuevo Contacto
+        </button>
+      </div>
+      <div class="content-card">
+        <div class="content-card-body">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Posición</th>
+                <th>Empresa</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="contacts-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deals View -->
+    <div id="deals-view" class="view-section">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Oportunidades</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dealModal">
+          <i class="bi bi-plus-lg me-1"></i> Nueva Oportunidad
+        </button>
+      </div>
+      <div class="content-card">
+        <div class="content-card-body">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Empresa</th>
+                <th>Contacto</th>
+                <th>Monto</th>
+                <th>Etapa</th>
+                <th>Probabilidad</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="deals-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activities View -->
+    <div id="activities-view" class="view-section">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Actividades</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#activityModal">
+          <i class="bi bi-plus-lg me-1"></i> Nueva Actividad
+        </button>
+      </div>
+      <div class="content-card">
+        <div class="content-card-body">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Asunto</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="activities-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Company Modal -->
+  <div class="modal fade" id="companyModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nueva Empresa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="companyForm">
+            <div class="mb-3">
+              <label class="form-label">Nombre *</label>
+              <input type="text" class="form-control" name="name" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Industria</label>
+              <input type="text" class="form-control" name="industry">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" name="email">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Teléfono</label>
+              <input type="text" class="form-control" name="phone">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Ciudad</label>
+              <input type="text" class="form-control" name="city">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">País</label>
+              <input type="text" class="form-control" name="country">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Guardar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Modal -->
+  <div class="modal fade" id="contactModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo Contacto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="contactForm">
+            <div class="mb-3">
+              <label class="form-label">Nombre *</label>
+              <input type="text" class="form-control" name="first_name" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Apellido *</label>
+              <input type="text" class="form-control" name="last_name" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" name="email">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Teléfono</label>
+              <input type="text" class="form-control" name="phone">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Posición</label>
+              <input type="text" class="form-control" name="position">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Guardar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deal Modal -->
+  <div class="modal fade" id="dealModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nueva Oportunidad</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="dealForm">
+            <div class="mb-3">
+              <label class="form-label">Título *</label>
+              <input type="text" class="form-control" name="title" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Descripción</label>
+              <textarea class="form-control" name="description" rows="2"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Monto</label>
+              <input type="number" class="form-control" name="amount">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Etapa</label>
+              <select class="form-select" name="stage">
+                <option value="prospecting">Prospecting</option>
+                <option value="qualification">Qualification</option>
+                <option value="proposal">Proposal</option>
+                <option value="negotiation">Negotiation</option>
+                <option value="closed_won">Closed Won</option>
+                <option value="closed_lost">Closed Lost</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Probabilidad (%)</label>
+              <input type="number" class="form-control" name="probability" min="0" max="100">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Guardar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Modal -->
+  <div class="modal fade" id="activityModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nueva Actividad</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="activityForm">
+            <div class="mb-3">
+              <label class="form-label">Tipo</label>
+              <select class="form-select" name="type">
+                <option value="call">Llamada</option>
+                <option value="email">Email</option>
+                <option value="meeting">Reunión</option>
+                <option value="task">Tarea</option>
+                <option value="note">Nota</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Asunto</label>
+              <input type="text" class="form-control" name="subject">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Descripción</label>
+              <textarea class="form-control" name="description" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Fecha</label>
+              <input type="datetime-local" class="form-control" name="due_date">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Guardar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

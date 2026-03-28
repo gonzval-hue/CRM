@@ -1,0 +1,939 @@
+{
+  "info": {
+    "name": "BidFlow AI CRM",
+    "description": "API endpoints for CRM Core, Dashboard, Tags, Notes, Email Templates, and Export/Import",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/metrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "metrics"],
+              "query": [
+                {
+                  "key": "owner_id",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Contacts by Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/contacts/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "contacts", "status"]
+            }
+          }
+        },
+        {
+          "name": "Get Deals Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/deals/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "deals", "summary"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Companies",
+      "item": [
+        {
+          "name": "List All Companies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/companies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "companies"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "owner_id",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Company by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/companies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "companies", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Company",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Empresa Ejemplo S.A.\",\n  \"industry\": \"Tecnología\",\n  \"website\": \"https://ejemplo.com\",\n  \"phone\": \"+34 123 456 789\",\n  \"email\": \"contacto@ejemplo.com\",\n  \"address\": \"Calle Principal 123\",\n  \"city\": \"Madrid\",\n  \"country\": \"España\",\n  \"owner_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/companies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "companies"]
+            }
+          }
+        },
+        {
+          "name": "Update Company",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Empresa Actualizada S.A.\",\n  \"phone\": \"+34 987 654 321\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/companies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "companies", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Company",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/companies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "companies", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contacts",
+      "item": [
+        {
+          "name": "List All Contacts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contacts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contacts"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "new",
+                  "disabled": true
+                },
+                {
+                  "key": "company_id",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Contact by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contacts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contacts", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Juan\",\n  \"last_name\": \"Pérez\",\n  \"email\": \"juan.perez@ejemplo.com\",\n  \"phone\": \"+34 600 123 456\",\n  \"mobile\": \"+34 600 654 321\",\n  \"position\": \"Director de Ventas\",\n  \"company_id\": 1,\n  \"owner_id\": 1,\n  \"lead_source\": \"website\",\n  \"status\": \"new\",\n  \"notes\": \"Contacto inicial desde formulario web\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contacts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contacts"]
+            }
+          }
+        },
+        {
+          "name": "Update Contact",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"contacted\",\n  \"position\": \"Gerente Comercial\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contacts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contacts", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Contact",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contacts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contacts", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Contacts by Company",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contacts/company/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contacts", "company", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deals",
+      "item": [
+        {
+          "name": "List All Deals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/deals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "deals"],
+              "query": [
+                {
+                  "key": "stage",
+                  "value": "prospecting",
+                  "disabled": true
+                },
+                {
+                  "key": "owner_id",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Deal by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/deals/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "deals", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Deal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Oportunidad - Empresa Ejemplo\",\n  \"description\": \"Venta de servicios de consultoría\",\n  \"amount\": 50000,\n  \"currency\": \"EUR\",\n  \"stage\": \"prospecting\",\n  \"probability\": 20,\n  \"expected_close_date\": \"2026-06-30\",\n  \"contact_id\": 1,\n  \"company_id\": 1,\n  \"owner_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/deals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "deals"]
+            }
+          }
+        },
+        {
+          "name": "Update Deal",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stage\": \"qualification\",\n  \"probability\": 40,\n  \"amount\": 55000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/deals/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "deals", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Deal",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/deals/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "deals", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Deals by Stage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/deals/stage/prospecting",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "deals", "stage", "prospecting"]
+            }
+          }
+        },
+        {
+          "name": "Get Pipeline Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/deals/pipeline/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "deals", "pipeline", "summary"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Activities",
+      "item": [
+        {
+          "name": "List All Activities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/activities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "activities"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "scheduled",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "call",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Activity by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/activities/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "activities", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Activity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"call\",\n  \"subject\": \"Llamada de seguimiento\",\n  \"description\": \"Discutir propuesta comercial\",\n  \"status\": \"scheduled\",\n  \"due_date\": \"2026-04-01 10:00:00\",\n  \"contact_id\": 1,\n  \"company_id\": 1,\n  \"owner_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/activities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "activities"]
+            }
+          }
+        },
+        {
+          "name": "Update Activity",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Llamada reprogramada\",\n  \"due_date\": \"2026-04-02 15:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/activities/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "activities", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/activities/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "activities", "1"]
+            }
+          }
+        },
+        {
+          "name": "Complete Activity",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/activities/1/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "activities", "1", "complete"]
+            }
+          }
+        },
+        {
+          "name": "Get Upcoming Activities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/activities/upcoming",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "activities", "upcoming"],
+              "query": [
+                {
+                  "key": "owner_id",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tags",
+      "item": [
+        {
+          "name": "List All Tags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tags",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags"]
+            }
+          }
+        },
+        {
+          "name": "Create Tag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cliente Premium\",\n  \"color\": \"#8B5CF6\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tags",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags"]
+            }
+          }
+        },
+        {
+          "name": "Update Tag",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cliente VIP\",\n  \"color\": \"#EF4444\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tags/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Tag",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tags/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Tags by Entity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tags/entity/contact/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags", "entity", "contact", "1"]
+            }
+          }
+        },
+        {
+          "name": "Add Tag to Entity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tagId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tags/entity/contact/1/add",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags", "entity", "contact", "1", "add"]
+            }
+          }
+        },
+        {
+          "name": "Sync Tags for Entity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tagIds\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tags/entity/company/1/sync",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags", "entity", "company", "1", "sync"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notes",
+      "item": [
+        {
+          "name": "List All Notes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes"],
+              "query": [
+                {
+                  "key": "entity_type",
+                  "value": "contact",
+                  "disabled": true
+                },
+                {
+                  "key": "entity_id",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Nota importante sobre el cliente\",\n  \"entity_type\": \"contact\",\n  \"entity_id\": 1,\n  \"owner_id\": 1,\n  \"is_pinned\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes"]
+            }
+          }
+        },
+        {
+          "name": "Update Note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Nota actualizada con más detalles\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Note",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Notes by Entity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/entity/contact/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "entity", "contact", "1"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Pin Note",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/1/toggle-pin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "1", "toggle-pin"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Email Templates",
+      "item": [
+        {
+          "name": "List All Templates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/email-templates",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "email-templates"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "follow_up",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Template",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo seguimiento personalizado\",\n  \"subject\": \"Seguimiento - {{contact.first_name}}\",\n  \"body\": \"Hola {{contact.first_name}},\\n\\nEspero que estés bien...\",\n  \"category\": \"follow_up\",\n  \"owner_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/email-templates",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "email-templates"]
+            }
+          }
+        },
+        {
+          "name": "Update Template",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Nuevo asunto actualizado\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/email-templates/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "email-templates", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Template",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/email-templates/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "email-templates", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Templates by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/email-templates/category/follow_up",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "email-templates", "category", "follow_up"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Export/Import",
+      "item": [
+        {
+          "name": "Export Contacts CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/export/contacts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "export", "contacts"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "qualified",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export Companies CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/export/companies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "export", "companies"]
+            }
+          }
+        },
+        {
+          "name": "Export Deals CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/export/deals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "export", "deals"],
+              "query": [
+                {
+                  "key": "stage",
+                  "value": "prospecting",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Import Contacts CSV",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"owner_id\": 1,\n  \"csvData\": \"first_name,last_name,email,phone,position\\nMaría,Gómez,maria@ejemplo.com,+34600111222,CEO\\nCarlos,Ruiz,carlos@ejemplo.com,+34600333444,CTO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/import/contacts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "import", "contacts"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
