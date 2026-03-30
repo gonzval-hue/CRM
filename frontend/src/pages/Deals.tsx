@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import api from '../services/api';
 import type { Deal } from '../types';
 import { cn } from '../lib/utils';
@@ -26,7 +27,10 @@ export const Deals: React.FC = () => {
   const fetchDeals = async () => {
     try {
       const response: any = await api.get('/api/deals');
-      setDeals(response.data);
+      // The API returns { success: true, data: [...] }
+      if (response && response.data) {
+        setDeals(response.data);
+      }
     } catch (error) {
       console.error('Error fetching deals:', error);
     } finally {
@@ -46,6 +50,37 @@ export const Deals: React.FC = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedDeal(null);
+  };
+
+  const onDragEnd = async (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) return;
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const stageId = destination.droppableId as Deal['stage'];
+    
+    // Optimistic UI Update
+    setDeals(prevDeals => prevDeals.map(deal => {
+      if (String(deal.id) === draggableId) {
+        return { ...deal, stage: stageId };
+      }
+      return deal;
+    }));
+
+    try {
+      await api.put(`/api/deals/${draggableId}`, { stage: stageId });
+    } catch (error) {
+      console.error('Error updating deal stage:', error);
+      alert('Error al actualizar el estado de la oportunidad. Revirtiendo...');
+      fetchDeals(); // revert optimistic on error
+    }
   };
 
   const handleSubmit = async (data: Partial<Deal>) => {
@@ -114,84 +149,113 @@ export const Deals: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
-        {stages.map((stage) => {
-          const stageDeals = deals.filter(d => d.stage === stage.id);
-          const totalAmount = stageDeals.reduce((sum, d) => sum + d.amount, 0);
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide items-start">
+          {stages.map((stage) => {
+            const stageDeals = deals.filter(d => d.stage === stage.id);
+            const totalAmount = stageDeals.reduce((sum, d) => sum + d.amount, 0);
 
-          return (
-            <div key={stage.id} className="flex-shrink-0 w-80 space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-2">
-                  <div className={cn("w-2 h-2 rounded-full", stage.color)}></div>
-                  <h3 className="font-bold text-slate-700 text-sm uppercase tracking-wider">{stage.label}</h3>
-                  <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                    {stageDeals.length}
-                  </span>
+            return (
+              <div key={stage.id} className="flex-shrink-0 w-80 space-y-4">
+                <div className="flex items-center justify-between px-2">
+                  <div className="flex items-center gap-2">
+                    <div className={cn("w-2 h-2 rounded-full", stage.color)}></div>
+                    <h3 className="font-bold text-slate-700 text-sm uppercase tracking-wider">{stage.label}</h3>
+                    <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                      {stageDeals.length}
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold text-slate-500">{formatCurrency(totalAmount)}</span>
                 </div>
-                <span className="text-xs font-bold text-slate-500">{formatCurrency(totalAmount)}</span>
-              </div>
 
-              <div className="bg-slate-100/50 p-2 rounded-xl min-h-[500px] border-2 border-dashed border-slate-200">
-                {loading ? (
-                  <div className="space-y-3">
-                    {[...Array(2)].map((_, i) => (
-                      <div key={i} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
-                        <div className="h-4 bg-slate-100 rounded w-3/4 mb-3"></div>
-                        <div className="h-3 bg-slate-50 rounded w-1/2"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {stageDeals.map((deal) => (
-                      <div 
-                        key={deal.id} 
-                        className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 hover:border-indigo-300 transition-all cursor-pointer group"
-                        onClick={() => handleOpenModal(deal)}
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                            {deal.title}
-                          </h4>
-                          <Edit2 className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-all" />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <Building2 className="w-3 h-3" />
-                            {deal.company_name || 'Sin empresa'}
-                          </div>
-                          <div className="flex items-center justify-between mt-4">
-                            <div className="flex items-center gap-1 text-sm font-bold text-slate-900">
-                              <DollarSign className="w-3.5 h-3.5 text-slate-400" />
-                              {formatCurrency(deal.amount).replace('$', '')}
+                <Droppable droppableId={stage.id}>
+                  {(provided, snapshot) => (
+                    <div 
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={cn(
+                        "bg-slate-100/50 p-2 rounded-xl min-h-[500px] border-2 border-dashed transition-colors",
+                        snapshot.isDraggingOver ? "border-indigo-300 bg-indigo-50/50" : "border-slate-200"
+                      )}
+                    >
+                      {loading ? (
+                        <div className="space-y-3">
+                          {[...Array(2)].map((_, i) => (
+                            <div key={i} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
+                              <div className="h-4 bg-slate-100 rounded w-3/4 mb-3"></div>
+                              <div className="h-3 bg-slate-50 rounded w-1/2"></div>
                             </div>
-                            <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                              <Calendar className="w-3 h-3" />
-                              {formatDate(deal.expected_close_date)}
-                            </div>
-                          </div>
+                          ))}
                         </div>
+                      ) : (
+                        <div className="space-y-3 min-h-[10px]">
+                          {stageDeals.map((deal, index) => (
+                            <Draggable key={deal.id} draggableId={String(deal.id)} index={index}>
+                              {(provided, snapshot) => (
+                                <div 
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className={cn(
+                                    "bg-white p-4 rounded-lg shadow-sm border border-slate-200 transition-all group",
+                                    !snapshot.isDragging && "hover:border-indigo-300 cursor-pointer",
+                                    snapshot.isDragging && "shadow-xl border-indigo-400 rotate-2 scale-105 opacity-90 cursor-grabbing"
+                                  )}
+                                  onClick={() => {
+                                    if (!snapshot.isDragging) {
+                                      handleOpenModal(deal);
+                                    }
+                                  }}
+                                  style={provided.draggableProps.style}
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <h4 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                      {deal.title}
+                                    </h4>
+                                    <Edit2 className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-all" />
+                                  </div>
+                                  
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                                      <Building2 className="w-3 h-3" />
+                                      {deal.company_name || 'Sin empresa'}
+                                    </div>
+                                    <div className="flex items-center justify-between mt-4">
+                                      <div className="flex items-center gap-1 text-sm font-bold text-slate-900">
+                                        <DollarSign className="w-3.5 h-3.5 text-slate-400" />
+                                        {formatCurrency(deal.amount).replace('$', '')}
+                                      </div>
+                                      <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                                        <Calendar className="w-3 h-3" />
+                                        {formatDate(deal.expected_close_date)}
+                                      </div>
+                                    </div>
+                                  </div>
 
-                        <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between">
-                          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                            <div 
-                              className={cn("h-full rounded-full transition-all duration-1000", stage.color)} 
-                              style={{ width: `${deal.probability}%` }}
-                            ></div>
-                          </div>
-                          <span className="ml-3 text-[10px] font-bold text-slate-500">{deal.probability}%</span>
+                                  <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between">
+                                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                      <div 
+                                        className={cn("h-full rounded-full transition-all duration-1000", stage.color)} 
+                                        style={{ width: `${deal.probability}%` }}
+                                      ></div>
+                                    </div>
+                                    <span className="ml-3 text-[10px] font-bold text-slate-500">{deal.probability}%</span>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  )}
+                </Droppable>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </DragDropContext>
 
       <Modal
         isOpen={isModalOpen}
