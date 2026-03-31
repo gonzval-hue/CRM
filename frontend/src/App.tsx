@@ -5,6 +5,7 @@ import { Companies } from './pages/Companies';
 import { Contacts } from './pages/Contacts';
 import { Deals } from './pages/Deals';
 import { Activities } from './pages/Activities';
+import { TendersExplorer } from './pages/TendersExplorer';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="companies" element={<Companies />} />
           <Route path="contacts" element={<Contacts />} />
           <Route path="deals" element={<Deals />} />
+          <Route path="tenders" element={<TendersExplorer />} />
           <Route path="activities" element={<Activities />} />
         </Route>
       </Routes>

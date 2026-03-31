@@ -6,7 +6,7 @@ class Deal {
     const { owner_id, stage, company_id, contact_id, search, limit = 100, offset = 0 } = filters;
     let sql = `
       SELECT d.id, d.title, d.description, d.amount, d.currency, d.stage, d.probability,
-             d.business_model,
+             d.business_model, d.external_id,
              DATE_FORMAT(d.expected_close_date, '%Y-%m-%d') as expected_close_date,
              d.contact_id, d.company_id, d.owner_id, d.created_at, d.updated_at,
              CONCAT(c.first_name, ' ', c.last_name) as contact_name, 
@@ -54,7 +54,7 @@ class Deal {
   static async findById(id) {
     const sql = `
       SELECT d.id, d.title, d.description, d.amount, d.currency, d.stage, d.probability,
-             d.business_model,
+             d.business_model, d.external_id,
              DATE_FORMAT(d.expected_close_date, '%Y-%m-%d') as expected_close_date,
              d.contact_id, d.company_id, d.owner_id, d.created_at, d.updated_at,
              CONCAT(c.first_name, ' ', c.last_name) as contact_name, c.email as contact_email,
@@ -72,20 +72,20 @@ class Deal {
   static async create(data) {
     const {
       title, description, amount, currency, stage, probability,
-      business_model,
+      business_model, external_id,
       expected_close_date, contact_id, company_id, owner_id
     } = data;
 
     const sql = `
       INSERT INTO deals 
-      (title, description, amount, currency, stage, probability, business_model,
+      (title, description, amount, currency, stage, probability, business_model, external_id,
        expected_close_date, contact_id, company_id, owner_id) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const result = await db.query(sql, [
       title, description, amount || 0, currency || 'USD',
-      stage || 'prospecting', probability || 0, business_model || 'project',
+      stage || 'prospecting', probability || 0, business_model || 'project', external_id,
       expected_close_date, contact_id, company_id, owner_id
     ]);
 
@@ -94,7 +94,7 @@ class Deal {
 
   static ALLOWED_FIELDS = [
     'title', 'description', 'amount', 'currency', 'stage',
-    'probability', 'business_model', 'expected_close_date', 'contact_id', 'company_id', 'owner_id'
+    'probability', 'business_model', 'external_id', 'expected_close_date', 'contact_id', 'company_id', 'owner_id'
   ];
 
   // Update deal
@@ -136,7 +136,7 @@ class Deal {
   static async findByStage(stage) {
     const sql = `
       SELECT d.id, d.title, d.description, d.amount, d.currency, d.stage, d.probability,
-             d.business_model,
+             d.business_model, d.external_id,
              DATE_FORMAT(d.expected_close_date, '%Y-%m-%d') as expected_close_date,
              d.contact_id, d.company_id, d.owner_id, d.created_at, d.updated_at,
              CONCAT(c.first_name, ' ', c.last_name) as contact_name, 

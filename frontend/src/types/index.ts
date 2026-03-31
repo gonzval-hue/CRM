@@ -37,6 +37,7 @@ export interface Deal {
   contact_name?: string;
   description?: string;
   expected_close_date?: string;
+  external_id?: string;
   created_at?: string;
 }
 

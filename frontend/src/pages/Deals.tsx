@@ -5,7 +5,7 @@ import type { Deal } from '../types';
 import { cn } from '../lib/utils';
 import { Modal } from '../components/Modal';
 import { DealForm } from '../components/DealForm';
-import { Edit2, Plus, Search, DollarSign, Calendar, Building2, Trash2 } from 'lucide-react';
+import { Edit2, Plus, Search, DollarSign, Calendar, Building2, Trash2, ExternalLink } from 'lucide-react';
 
 const stages = [
   { id: 'prospecting', label: 'Prospecting', color: 'bg-blue-500' },
@@ -222,6 +222,18 @@ export const Deals: React.FC = () => {
                                       {deal.title}
                                     </h4>
                                     <div className="flex gap-2">
+                                      {deal.external_id && (
+                                        <a 
+                                          href={`https://www.mercadopublico.cl/Procurement/Modules/RFB/DetailsAcquisition.aspx?idlicitacion=${deal.external_id}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          onClick={(e) => e.stopPropagation()}
+                                          className="text-blue-400 hover:text-blue-600 transition-all"
+                                          title="Ver en Mercado Público"
+                                        >
+                                          <ExternalLink className="w-3.5 h-3.5" />
+                                        </a>
+                                      )}
                                       {deal.stage === 'shelved' && (
                                         <Trash2 
                                           className="w-3.5 h-3.5 text-rose-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all cursor-pointer" 

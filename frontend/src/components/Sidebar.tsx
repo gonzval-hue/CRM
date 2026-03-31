@@ -7,7 +7,8 @@ import {
   CalendarCheck, 
   LayoutDashboard,
   LogOut,
-  TrendingUp
+  TrendingUp,
+  Search
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -16,6 +17,7 @@ const menuItems = [
   { icon: Building2, label: 'Empresas', path: '/companies' },
   { icon: Users, label: 'Contactos', path: '/contacts' },
   { icon: TrendingUp, label: 'Oportunidades', path: '/deals' },
+  { icon: Search, label: 'Licitaciones', path: '/tenders' },
   { icon: CalendarCheck, label: 'Actividades', path: '/activities' },
 ];
 
