@@ -58,6 +58,7 @@ const formatDate = (dateValue: any) => {
 export const Dashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'split' | 'acv'>('split');
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -97,24 +98,34 @@ export const Dashboard: React.FC = () => {
 
   if (!metrics) return null;
 
-  const chartData = metrics.dealsByStage.map((stage: any) => ({
-    name: stage.stage.charAt(0).toUpperCase() + stage.stage.slice(1),
-    amount: stage.total_amount,
-    count: stage.count
-  }));
+  const stagesInOrder = ['prospecting', 'qualification', 'proposal', 'negotiation', 'closed_won', 'closed_lost'];
+  const chartData = stagesInOrder.map(stageName => {
+    const items = metrics.dealsByStage.filter((s: any) => s.stage === stageName);
+    const projectAmt = items.filter((s: any) => s.business_model !== 'service').reduce((sum, s: any) => sum + s.total_amount, 0);
+    const serviceAmt = items.filter((s: any) => s.business_model === 'service').reduce((sum, s: any) => sum + s.total_amount, 0);
+    
+    return {
+      name: stageName.charAt(0).toUpperCase() + stageName.slice(1),
+      stage: stageName,
+      project: projectAmt,
+      service: serviceAmt,
+      service_acv: serviceAmt * 12,
+      acv: projectAmt + (serviceAmt * 12),
+      count: items.reduce((sum, s: any) => sum + s.count, 0)
+    };
+  }).filter(d => d.stage !== 'shelved');
 
-  // Calculate financial metrics
-  const pipelineTotal = metrics.dealsByStage
-    .filter(s => ['prospecting', 'qualification', 'proposal', 'negotiation'].includes(s.stage))
-    .reduce((sum, s) => sum + s.total_amount, 0);
+  // Calculate financial metrics helper
+  const calcMetrics = (stagesArray: string[]) => {
+    const items = metrics.dealsByStage.filter((s: any) => stagesArray.includes(s.stage));
+    const project = items.filter((s: any) => s.business_model !== 'service').reduce((sum, s: any) => sum + s.total_amount, 0);
+    const service = items.filter((s: any) => s.business_model === 'service').reduce((sum, s: any) => sum + s.total_amount, 0);
+    return { project, service, acv: project + (service * 12) };
+  };
 
-  const qualifiedPipeline = metrics.dealsByStage
-    .filter(s => ['qualification', 'proposal', 'negotiation'].includes(s.stage))
-    .reduce((sum, s) => sum + s.total_amount, 0);
-
-  const revenueTotal = metrics.dealsByStage
-    .filter(s => s.stage === 'closed_won')
-    .reduce((sum, s) => sum + s.total_amount, 0);
+  const pipeline = calcMetrics(['prospecting', 'qualification', 'proposal', 'negotiation']);
+  const qualified = calcMetrics(['qualification', 'proposal', 'negotiation']);
+  const revenue = calcMetrics(['closed_won']);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -132,8 +143,8 @@ export const Dashboard: React.FC = () => {
           { id: 'negotiation', label: 'Negociación', color: 'purple' },
           { id: 'closed_won', label: 'Ganadas', color: 'green' },
         ].map((stage) => {
-          const dealData = metrics.dealsByStage.find(s => s.stage === stage.id);
-          const count = dealData ? dealData.count : 0;
+          const items = metrics.dealsByStage.filter(s => s.stage === stage.id);
+          const count = items.reduce((sum, s) => sum + s.count, 0);
           
           return (
             <StatCard 
@@ -153,20 +164,61 @@ export const Dashboard: React.FC = () => {
           {/* Bar Chart */}
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-slate-900">Pipeline de Ventas</h3>
-              <span className="text-sm text-slate-500 font-medium">Por Monto Estimado (USD)</span>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Pipeline de Ventas</h3>
+                <span className="text-sm text-slate-500 font-medium">Por Monto Estimado (USD)</span>
+              </div>
+              <div className="flex bg-slate-100 p-1 rounded-lg">
+                <button
+                  onClick={() => setViewMode('split')}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'split' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  Separado (MRR vs Único)
+                </button>
+                <button
+                  onClick={() => setViewMode('acv')}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'acv' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  Anualizado (ACV)
+                </button>
+              </div>
             </div>
             <div className="h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData.filter((d: any) => d.name !== 'Shelved')}>
+                <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
                   <Tooltip 
                     cursor={{ fill: '#f8fafc' }}
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    formatter={(value: any, name: any) => {
+                      const translations: Record<string, string> = { project: 'Proyecto', service: 'Servicio (MRR)', service_acv: 'Servicio (ACV)', acv: 'ACV' };
+                      return [formatCurrency(Number(value)), translations[String(name)] || String(name)];
+                    }}
                   />
-                  <Bar dataKey="amount" fill="#4f46e5" radius={[4, 4, 0, 0]} barSize={40} />
+                  {viewMode === 'split' ? (
+                    <>
+                      <Bar dataKey="project" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="service" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    </>
+                  ) : (
+                    <>
+                      <Bar dataKey="project" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="service_acv" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    </>
+                  )}
+                  <Legend 
+                    iconType="circle" 
+                    formatter={(v) => {
+                      const translations: Record<string, string> = { 
+                        project: 'Proyectos', 
+                        service: 'Servicios (MRR)', 
+                        service_acv: 'Servicios (ACV - Anualizado)' 
+                      };
+                      return translations[v] || v;
+                    }} 
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -177,7 +229,14 @@ export const Dashboard: React.FC = () => {
                 <thead>
                   <tr className="text-xs uppercase tracking-wider text-slate-400 font-bold">
                     <th className="pb-3 px-2">Categoría</th>
-                    <th className="pb-3 px-2 text-right">Monto Estimado</th>
+                    {viewMode === 'split' ? (
+                      <>
+                        <th className="pb-3 px-2 text-right">Proyectos (Único)</th>
+                        <th className="pb-3 px-2 text-right">Servicios (MRR)</th>
+                      </>
+                    ) : (
+                      <th className="pb-3 px-2 text-right">Valor Anualizado (ACV)</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -186,21 +245,48 @@ export const Dashboard: React.FC = () => {
                       <div className="font-bold text-slate-900">Pipeline</div>
                       <div className="text-[10px] text-slate-400 uppercase">Prospección + Calificación + Propuesta + Negociación</div>
                     </td>
-                    <td className="py-3 px-2 text-right font-bold text-indigo-600">{formatCurrency(pipelineTotal)}</td>
+                    {viewMode === 'split' ? (
+                      <>
+                        <td className="py-3 px-2 text-right font-bold text-indigo-600">{formatCurrency(pipeline.project)}</td>
+                        <td className="py-3 px-2 text-right font-bold text-emerald-600">
+                          {formatCurrency(pipeline.service)} <span className="text-[10px] font-normal text-slate-400">/mo</span>
+                        </td>
+                      </>
+                    ) : (
+                      <td className="py-3 px-2 text-right font-bold text-indigo-600">{formatCurrency(pipeline.acv)}</td>
+                    )}
                   </tr>
                   <tr className="hover:bg-slate-50 transition-colors">
                     <td className="py-3 px-2">
                       <div className="font-bold text-slate-900">Pipeline Calificado</div>
                       <div className="text-[10px] text-slate-400 uppercase">Calificación + Propuesta + Negociación</div>
                     </td>
-                    <td className="py-3 px-2 text-right font-bold text-blue-600">{formatCurrency(qualifiedPipeline)}</td>
+                    {viewMode === 'split' ? (
+                      <>
+                        <td className="py-3 px-2 text-right font-bold text-blue-600">{formatCurrency(qualified.project)}</td>
+                        <td className="py-3 px-2 text-right font-bold text-emerald-600">
+                          {formatCurrency(qualified.service)} <span className="text-[10px] font-normal text-slate-400">/mo</span>
+                        </td>
+                      </>
+                    ) : (
+                      <td className="py-3 px-2 text-right font-bold text-blue-600">{formatCurrency(qualified.acv)}</td>
+                    )}
                   </tr>
                   <tr className="hover:bg-slate-50 transition-colors">
                     <td className="py-3 px-2">
                       <div className="font-bold text-emerald-600">Revenue (Ventas)</div>
                       <div className="text-[10px] text-slate-400 uppercase">Todas las Ganadas</div>
                     </td>
-                    <td className="py-3 px-2 text-right font-bold text-emerald-600">{formatCurrency(revenueTotal)}</td>
+                    {viewMode === 'split' ? (
+                      <>
+                        <td className="py-3 px-2 text-right font-bold text-emerald-600">{formatCurrency(revenue.project)}</td>
+                        <td className="py-3 px-2 text-right font-bold text-emerald-600">
+                          {formatCurrency(revenue.service)} <span className="text-[10px] font-normal text-slate-400">/mo</span>
+                        </td>
+                      </>
+                    ) : (
+                      <td className="py-3 px-2 text-right font-bold text-emerald-600">{formatCurrency(revenue.acv)}</td>
+                    )}
                   </tr>
                 </tbody>
               </table>
@@ -218,8 +304,16 @@ export const Dashboard: React.FC = () => {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: 'Ganadas', value: metrics.dealsByStage.find((s: any) => s.stage === 'closed_won')?.count || 0 },
-                      { name: 'Perdidas', value: metrics.dealsByStage.find((s: any) => s.stage === 'closed_lost')?.count || 0 }
+                      (() => {
+                        const items = metrics.dealsByStage.filter((s: any) => s.stage === 'closed_won');
+                        const wonCount = items.reduce((sum: number, s: any) => sum + s.count, 0);
+                        return { name: 'Ganadas', value: wonCount };
+                      })(),
+                      (() => {
+                        const items = metrics.dealsByStage.filter((s: any) => s.stage === 'closed_lost');
+                        const lostCount = items.reduce((sum: number, s: any) => sum + s.count, 0);
+                        return { name: 'Perdidas', value: lostCount };
+                      })()
                     ].filter((d: any) => d.value > 0)}
                     cx="50%"
                     cy="50%"
@@ -229,8 +323,16 @@ export const Dashboard: React.FC = () => {
                     dataKey="value"
                   >
                     {[
-                      { name: 'Ganadas', value: metrics.dealsByStage.find((s: any) => s.stage === 'closed_won')?.count || 0 },
-                      { name: 'Perdidas', value: metrics.dealsByStage.find((s: any) => s.stage === 'closed_lost')?.count || 0 }
+                      (() => {
+                        const items = metrics.dealsByStage.filter((s: any) => s.stage === 'closed_won');
+                        const wonCount = items.reduce((sum: number, s: any) => sum + s.count, 0);
+                        return { name: 'Ganadas', value: wonCount };
+                      })(),
+                      (() => {
+                        const items = metrics.dealsByStage.filter((s: any) => s.stage === 'closed_lost');
+                        const lostCount = items.reduce((sum: number, s: any) => sum + s.count, 0);
+                        return { name: 'Perdidas', value: lostCount };
+                      })()
                     ].filter((d: any) => d.value > 0).map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.name === 'Ganadas' ? '#10b981' : '#ef4444'} />
                     ))}
@@ -244,8 +346,8 @@ export const Dashboard: React.FC = () => {
               
               {/* Central Percentage Display */}
               {(() => {
-                const won = metrics.dealsByStage.find((s: any) => s.stage === 'closed_won')?.count || 0;
-                const lost = metrics.dealsByStage.find((s: any) => s.stage === 'closed_lost')?.count || 0;
+                const won = metrics.dealsByStage.filter((s: any) => s.stage === 'closed_won').reduce((sum: number, s: any) => sum + s.count, 0);
+                const lost = metrics.dealsByStage.filter((s: any) => s.stage === 'closed_lost').reduce((sum: number, s: any) => sum + s.count, 0);
                 const total = won + lost;
                 const percentage = total > 0 ? Math.round((won / total) * 100) : 0;
                 

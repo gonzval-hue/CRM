@@ -50,6 +50,7 @@ export const DealForm: React.FC<DealFormProps> = ({
     company_id: undefined,
     contact_id: undefined,
     amount: 0,
+    business_model: 'project',
     stage: 'prospecting',
     probability: 20,
     description: '',
@@ -151,8 +152,38 @@ export const DealForm: React.FC<DealFormProps> = ({
           </select>
         </div>
 
+        <div className="md:col-span-2">
+          <label className="block text-sm font-bold text-slate-700 mb-1">Modelo de Negocio *</label>
+          <div className="flex gap-4 p-1 bg-slate-100 rounded-lg w-max">
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, business_model: 'project' }))}
+              className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${
+                formData.business_model === 'project' 
+                  ? 'bg-white text-indigo-700 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Proyecto (Pago único)
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, business_model: 'service' }))}
+              className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${
+                formData.business_model === 'service' 
+                  ? 'bg-white text-indigo-700 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Servicio (Suscripción Mensual)
+            </button>
+          </div>
+        </div>
+
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Monto (USD)</label>
+          <label className="block text-sm font-bold text-slate-700 mb-1">
+            {formData.business_model === 'service' ? 'Monto Mensual (USD)' : 'Monto Total (USD)'} *
+          </label>
           <input
             type="number"
             name="amount"

@@ -28,6 +28,7 @@ export interface Deal {
   id: number;
   title: string;
   amount: number;
+  business_model: 'project' | 'service';
   stage: 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost' | 'shelved';
   probability: number;
   company_id?: number;
@@ -61,6 +62,6 @@ export interface DashboardMetrics {
     activeDeals: number;
     pendingActivities: number;
   };
-  dealsByStage: Array<{ stage: string; count: number; total_amount: number }>;
+  dealsByStage: Array<{ stage: string; business_model: string; count: number; total_amount: number }>;
   recentActivities: Activity[];
 }

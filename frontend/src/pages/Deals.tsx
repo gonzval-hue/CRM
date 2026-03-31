@@ -244,6 +244,7 @@ export const Deals: React.FC = () => {
                                       <div className="flex items-center gap-1 text-sm font-bold text-slate-900">
                                         <DollarSign className="w-3.5 h-3.5 text-slate-400" />
                                         {formatCurrency(deal.amount).replace('$', '')}
+                                        {deal.business_model === 'service' && <span className="text-[10px] text-slate-400 ml-0.5">/ mes</span>}
                                       </div>
                                       <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
                                         <Calendar className="w-3 h-3" />

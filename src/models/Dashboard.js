@@ -15,12 +15,12 @@ class Dashboard {
       db.query(`SELECT COUNT(*) as total FROM activities WHERE status = 'scheduled' ${ownerFilter}`, params),
     ]);
 
-    // Deals by stage
+    // Deals by stage and business model
     const dealsByStage = await db.query(`
-      SELECT stage, COUNT(*) as count, SUM(amount) as total_amount
+      SELECT stage, business_model, COUNT(*) as count, SUM(amount) as total_amount
       FROM deals
       WHERE 1=1 ${ownerFilter}
-      GROUP BY stage
+      GROUP BY stage, business_model
       ORDER BY FIELD(stage, 'prospecting', 'qualification', 'proposal', 'negotiation', 'closed_won', 'closed_lost')
     `, params);
 

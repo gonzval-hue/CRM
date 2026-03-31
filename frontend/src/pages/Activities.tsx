@@ -25,6 +25,29 @@ const iconMap: Record<string, any> = {
   note: Clock,
 };
 
+// Helper for robust date formatting
+const formatDateTime = (dateValue: any) => {
+  if (!dateValue) return 'Sin fecha';
+  let date: Date;
+  if (dateValue instanceof Date) {
+    date = dateValue;
+  } else if (typeof dateValue === 'string') {
+    const isoString = dateValue.includes(' ') ? dateValue.replace(' ', 'T') : dateValue;
+    date = new Date(isoString);
+  } else {
+    date = new Date(dateValue);
+  }
+
+  if (isNaN(date.getTime())) return 'Fecha inválida';
+  
+  return date.toLocaleDateString('es-ES', { 
+    day: '2-digit', 
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
 export const Activities: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,6 +104,42 @@ export const Activities: React.FC = () => {
       alert('Error al guardar la actividad');
     }
   };
+
+  // Dynamic Summary Calculations
+  const today = new Date().toDateString();
+  const todayActivities = activities.filter(a => {
+    if (!a.due_date) return false;
+    const date = new Date(typeof a.due_date === 'string' ? a.due_date.replace(' ', 'T') : a.due_date);
+    return date.toDateString() === today;
+  });
+
+  // Group by type
+  const typeLabels: Record<string, string> = {
+    call: 'Llamadas',
+    phone: 'Llamadas',
+    meeting: 'Reuniones',
+    email: 'Emails',
+    task: 'Tareas',
+    note: 'Notas'
+  };
+
+  const activityCounts = todayActivities.reduce((acc: Record<string, number>, curr) => {
+    const label = typeLabels[curr.type] || 'Otras';
+    acc[label] = (acc[label] || 0) + 1;
+    return acc;
+  }, {});
+
+  // All pending activities (regardless of date)
+  const allPendingActivities = activities.filter(a => a.status === 'scheduled');
+  const allPendingCounts = allPendingActivities.reduce((acc: Record<string, number>, curr) => {
+    const label = typeLabels[curr.type] || 'Otras';
+    acc[label] = (acc[label] || 0) + 1;
+    return acc;
+  }, {});
+
+  const completedToday = todayActivities.filter(a => a.status === 'completed').length;
+  const totalToday = todayActivities.length;
+  const progressPercent = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -182,7 +241,7 @@ export const Activities: React.FC = () => {
                         </div>
                         <time className="text-xs font-bold text-slate-400 flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5" />
-                          {new Date(activity.due_date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          {formatDateTime(activity.due_date)}
                         </time>
                       </div>
                     </div>
@@ -201,18 +260,45 @@ export const Activities: React.FC = () => {
           <div className="bg-indigo-600 p-6 rounded-xl text-white shadow-lg shadow-indigo-200">
             <h4 className="font-bold mb-2">Tu actividad hoy</h4>
             <div className="space-y-4 mt-6">
-              <div className="flex justify-between items-center text-sm">
-                <span className="opacity-80">Llamadas pendientes</span>
-                <span className="font-bold">3</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="opacity-80">Reuniones</span>
-                <span className="font-bold">1</span>
-              </div>
+              {Object.keys(activityCounts).length > 0 ? (
+                Object.entries(activityCounts).map(([label, count]) => (
+                  <div key={label} className="flex justify-between items-center text-sm">
+                    <span className="opacity-80">{label}</span>
+                    <span className="font-bold">{count}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs opacity-60 text-center py-2">Sin actividades para hoy</p>
+              )}
+              
               <div className="w-full bg-indigo-500 h-2 rounded-full mt-4 overflow-hidden">
-                <div className="bg-white h-full w-2/3 rounded-full shadow-sm shadow-white/20"></div>
+                <div 
+                  className="bg-white h-full transition-all duration-1000 rounded-full shadow-sm shadow-white/20"
+                  style={{ width: `${progressPercent}%` }}
+                ></div>
               </div>
-              <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest text-center mt-2">66% completado</p>
+              <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest text-center mt-2">
+                {progressPercent}% completado
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-indigo-600" />
+              Total Pendientes
+            </h4>
+            <div className="space-y-3">
+              {Object.keys(allPendingCounts).length > 0 ? (
+                Object.entries(allPendingCounts).map(([label, count]) => (
+                  <div key={label} className="flex justify-between items-center text-sm">
+                    <span className="text-slate-500">{label}</span>
+                    <span className="font-bold text-slate-900 bg-slate-50 px-2 py-0.5 rounded-full">{count}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-slate-400 text-center py-2">No hay actividades pendientes</p>
+              )}
             </div>
           </div>
         </div>
