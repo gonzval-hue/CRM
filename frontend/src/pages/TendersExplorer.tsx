@@ -155,6 +155,7 @@ export const TendersExplorer: React.FC = () => {
         company_id: companyId,
         contact_id: contactId,
         owner_id: 1,
+        currency: 'CLP',
         external_id: tender.id || tender.CodigoExterno,
         description: `Importado desde Mercado Publico.\nLicitación: ${tender.id || tender.CodigoExterno}\n\n${tender.Descripcion || ''}${detallesExtra}`,
         expected_close_date: (tender.Fechas?.FechaFinal || tender.close_date || tender.FechaCierre) 

@@ -24,7 +24,7 @@ import { StatCard } from '../components/StatCard';
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('es-CL', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'CLP',
     minimumFractionDigits: 0,
   }).format(amount);
 };
@@ -166,7 +166,7 @@ export const Dashboard: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">Pipeline de Ventas</h3>
-                <span className="text-sm text-slate-500 font-medium">Por Monto Estimado (USD)</span>
+                <span className="text-sm text-slate-500 font-medium">Por Monto Estimado (CLP)</span>
               </div>
               <div className="flex bg-slate-100 p-1 rounded-lg">
                 <button

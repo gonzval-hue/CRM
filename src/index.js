@@ -48,8 +48,16 @@ app.use('/api/notes', require('./routes/noteRoutes'));
 app.use('/api/email-templates', require('./routes/emailTemplateRoutes'));
 app.use('/api/export', require('./routes/exportImportRoutes'));
 
-// 404 handler
+// SPA Catch-all: sirve index.html para todas las rutas no-API
+// Esto permite que React Router maneje rutas como /deals, /contacts, etc.
 app.use((req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
+  const indexPath = path.join(__dirname, '../public/index.html');
+  if (require('fs').existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
   res.status(404).json({ error: 'Not Found' });
 });
 

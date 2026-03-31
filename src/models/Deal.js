@@ -84,7 +84,7 @@ class Deal {
     `;
 
     const result = await db.query(sql, [
-      title, description, amount || 0, currency || 'USD',
+      title, description, amount || 0, currency || 'CLP',
       stage || 'prospecting', probability || 0, business_model || 'project', external_id,
       expected_close_date, contact_id, company_id, owner_id
     ]);

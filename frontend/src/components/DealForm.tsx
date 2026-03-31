@@ -205,7 +205,7 @@ export const DealForm: React.FC<DealFormProps> = ({
 
         <div>
           <label className="block text-sm font-bold text-slate-700 mb-1">
-            {formData.business_model === 'service' ? 'Monto Mensual (USD)' : 'Monto Total (USD)'} *
+            {formData.business_model === 'service' ? 'Monto Mensual (CLP)' : 'Monto Total (CLP)'} *
           </label>
           <input
             type="number"
@@ -213,8 +213,8 @@ export const DealForm: React.FC<DealFormProps> = ({
             value={formData.amount}
             onChange={handleChange}
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all"
-            step="0.01"
-            placeholder="0.00"
+            step="1"
+            placeholder="0"
           />
         </div>
 

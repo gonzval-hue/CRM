@@ -113,9 +113,10 @@ export const Deals: React.FC = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('es-CL', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'CLP',
+      minimumFractionDigits: 0,
     }).format(amount);
   };
 
