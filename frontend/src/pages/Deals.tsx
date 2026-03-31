@@ -5,7 +5,7 @@ import type { Deal } from '../types';
 import { cn } from '../lib/utils';
 import { Modal } from '../components/Modal';
 import { DealForm } from '../components/DealForm';
-import { Edit2, Plus, Search, DollarSign, Calendar, Building2 } from 'lucide-react';
+import { Edit2, Plus, Search, DollarSign, Calendar, Building2, Trash2 } from 'lucide-react';
 
 const stages = [
   { id: 'prospecting', label: 'Prospecting', color: 'bg-blue-500' },
@@ -14,6 +14,7 @@ const stages = [
   { id: 'negotiation', label: 'Negotiation', color: 'bg-purple-500' },
   { id: 'closed_won', label: 'Closed Won', color: 'bg-emerald-500' },
   { id: 'closed_lost', label: 'Closed Lost', color: 'bg-rose-500' },
+  { id: 'shelved', label: 'Archivado (Shelved)', color: 'bg-slate-400' },
 ];
 
 export const Deals: React.FC = () => {
@@ -97,6 +98,17 @@ export const Deals: React.FC = () => {
       fetchDeals();
     } catch (error) {
       alert('Error al guardar la oportunidad');
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar esta oportunidad?')) return;
+    try {
+      await api.delete(`/api/deals/${id}`);
+      handleCloseModal();
+      fetchDeals();
+    } catch (error) {
+      alert('Error al eliminar la oportunidad');
     }
   };
 
@@ -209,7 +221,18 @@ export const Deals: React.FC = () => {
                                     <h4 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                                       {deal.title}
                                     </h4>
-                                    <Edit2 className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-all" />
+                                    <div className="flex gap-2">
+                                      {deal.stage === 'shelved' && (
+                                        <Trash2 
+                                          className="w-3.5 h-3.5 text-rose-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all cursor-pointer" 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDelete(deal.id);
+                                          }}
+                                        />
+                                      )}
+                                      <Edit2 className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-all" />
+                                    </div>
                                   </div>
                                   
                                   <div className="space-y-2">
@@ -263,6 +286,7 @@ export const Deals: React.FC = () => {
         <DealForm 
           initialData={selectedDeal}
           onSubmit={handleSubmit}
+          onDelete={selectedDeal ? () => handleDelete(selectedDeal.id) : undefined}
           onCancel={handleCloseModal}
         />
       </Modal>

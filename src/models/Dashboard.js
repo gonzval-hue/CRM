@@ -24,20 +24,19 @@ class Dashboard {
       ORDER BY FIELD(stage, 'prospecting', 'qualification', 'proposal', 'negotiation', 'closed_won', 'closed_lost')
     `, params);
 
-    // Recent activities
+    // Recent activities (All pending)
     const recentActivities = await db.query(`
-      SELECT a.*, c.first_name, c.last_name, co.name as company_name
+      SELECT a.*, CONCAT(c.first_name, ' ', c.last_name) as contact_name, co.name as company_name
       FROM activities a
       LEFT JOIN contacts c ON a.contact_id = c.id
       LEFT JOIN companies co ON a.company_id = co.id
-      WHERE 1=1 ${ownerFilter}
-      ORDER BY a.created_at DESC
-      LIMIT 10
+      WHERE a.status = 'scheduled' ${ownerFilter}
+      ORDER BY a.due_date ASC
     `, params);
 
     // Top deals (by amount)
     const topDeals = await db.query(`
-      SELECT d.*, c.first_name, c.last_name, co.name as company_name
+      SELECT d.*, CONCAT(c.first_name, ' ', c.last_name) as contact_name, co.name as company_name
       FROM deals d
       LEFT JOIN contacts c ON d.contact_id = c.id
       LEFT JOIN companies co ON d.company_id = co.id

@@ -5,6 +5,7 @@ import api from '../services/api';
 interface DealFormProps {
   initialData?: Deal | null;
   onSubmit: (data: Partial<Deal>) => Promise<void>;
+  onDelete?: () => Promise<void>;
   onCancel: () => void;
 }
 
@@ -15,11 +16,13 @@ const stages = [
   { id: 'negotiation', label: 'Negotiation' },
   { id: 'closed_won', label: 'Closed Won' },
   { id: 'closed_lost', label: 'Closed Lost' },
+  { id: 'shelved', label: 'Archivado (Shelved)' },
 ];
 
 export const DealForm: React.FC<DealFormProps> = ({ 
   initialData, 
   onSubmit, 
+  onDelete,
   onCancel 
 }) => {
   const getSafeDate = (val: any) => {
@@ -212,21 +215,34 @@ export const DealForm: React.FC<DealFormProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-6 py-2 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all"
-        >
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all shadow-lg shadow-indigo-100 active:scale-95"
-        >
-          {loading ? 'Guardando...' : initialData ? 'Actualizar Oportunidad' : 'Crear Oportunidad'}
-        </button>
+      <div className="flex justify-between items-center pt-6 border-t border-slate-100">
+        <div>
+          {initialData && formData.stage === 'shelved' && onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="px-4 py-2 border border-rose-200 text-rose-600 font-bold rounded-xl hover:bg-rose-50 transition-all flex items-center gap-2"
+            >
+              Borrar Oportunidad
+            </button>
+          )}
+        </div>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all shadow-lg shadow-indigo-100 active:scale-95"
+          >
+            {loading ? 'Guardando...' : initialData ? 'Actualizar Oportunidad' : 'Crear Oportunidad'}
+          </button>
+        </div>
       </div>
     </form>
   );

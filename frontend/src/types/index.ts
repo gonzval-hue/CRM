@@ -28,7 +28,7 @@ export interface Deal {
   id: number;
   title: string;
   amount: number;
-  stage: 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost';
+  stage: 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost' | 'shelved';
   probability: number;
   company_id?: number;
   contact_id?: number;
@@ -50,6 +50,7 @@ export interface Activity {
   company_id?: number;
   deal_id?: number;
   contact_name?: string;
+  company_name?: string;
   created_at?: string;
 }
 

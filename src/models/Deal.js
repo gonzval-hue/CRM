@@ -154,7 +154,7 @@ class Deal {
              SUM(amount) as total_amount,
              AVG(amount) as avg_amount
       FROM deals
-      WHERE stage NOT IN ('closed_won', 'closed_lost')
+      WHERE stage NOT IN ('closed_won', 'closed_lost', 'shelved')
       GROUP BY stage
       ORDER BY FIELD(stage, 'prospecting', 'qualification', 'proposal', 'negotiation')
     `;
