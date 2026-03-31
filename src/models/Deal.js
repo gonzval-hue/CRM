@@ -5,7 +5,9 @@ class Deal {
   static async findAll(filters = {}) {
     const { owner_id, stage, company_id, contact_id, search, limit = 100, offset = 0 } = filters;
     let sql = `
-      SELECT d.*, 
+      SELECT d.id, d.title, d.description, d.amount, d.currency, d.stage, d.probability,
+             DATE_FORMAT(d.expected_close_date, '%Y-%m-%d') as expected_close_date,
+             d.contact_id, d.company_id, d.owner_id, d.created_at, d.updated_at,
              CONCAT(c.first_name, ' ', c.last_name) as contact_name, 
              co.name as company_name
       FROM deals d
@@ -50,7 +52,9 @@ class Deal {
   // Get deal by ID
   static async findById(id) {
     const sql = `
-      SELECT d.*, 
+      SELECT d.id, d.title, d.description, d.amount, d.currency, d.stage, d.probability,
+             DATE_FORMAT(d.expected_close_date, '%Y-%m-%d') as expected_close_date,
+             d.contact_id, d.company_id, d.owner_id, d.created_at, d.updated_at,
              CONCAT(c.first_name, ' ', c.last_name) as contact_name, c.email as contact_email,
              co.name as company_name
       FROM deals d
@@ -128,7 +132,9 @@ class Deal {
   // Get deals by stage (for pipeline view)
   static async findByStage(stage) {
     const sql = `
-      SELECT d.*, 
+      SELECT d.id, d.title, d.description, d.amount, d.currency, d.stage, d.probability,
+             DATE_FORMAT(d.expected_close_date, '%Y-%m-%d') as expected_close_date,
+             d.contact_id, d.company_id, d.owner_id, d.created_at, d.updated_at,
              CONCAT(c.first_name, ' ', c.last_name) as contact_name, 
              co.name as company_name
       FROM deals d

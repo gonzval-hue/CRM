@@ -71,7 +71,10 @@ export const DealForm: React.FC<DealFormProps> = ({
     fetchData();
 
     if (initialData) {
-      setFormData(initialData);
+      setFormData({
+        ...initialData,
+        expected_close_date: getSafeDate(initialData.expected_close_date)
+      });
     }
   }, [initialData]);
 

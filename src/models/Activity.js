@@ -5,7 +5,11 @@ class Activity {
   static async findAll(filters = {}) {
     const { owner_id, type, status, contact_id, company_id, deal_id, limit = 100, offset = 0 } = filters;
     let sql = `
-      SELECT a.*, 
+      SELECT a.id, a.type, a.subject, a.description, a.status,
+             DATE_FORMAT(a.due_date, '%Y-%m-%dT%H:%i:%s') as due_date,
+             a.contact_id, a.company_id, a.deal_id, a.owner_id,
+             DATE_FORMAT(a.created_at, '%Y-%m-%d %H:%i:%s') as created_at,
+             DATE_FORMAT(a.updated_at, '%Y-%m-%d %H:%i:%s') as updated_at,
              CONCAT(c.first_name, ' ', c.last_name) as contact_name,
              co.name as company_name,
              d.title as deal_title
@@ -56,7 +60,11 @@ class Activity {
   // Get activity by ID
   static async findById(id) {
     const sql = `
-      SELECT a.*, 
+      SELECT a.id, a.type, a.subject, a.description, a.status,
+             DATE_FORMAT(a.due_date, '%Y-%m-%dT%H:%i:%s') as due_date,
+             a.contact_id, a.company_id, a.deal_id, a.owner_id,
+             DATE_FORMAT(a.created_at, '%Y-%m-%d %H:%i:%s') as created_at,
+             DATE_FORMAT(a.updated_at, '%Y-%m-%d %H:%i:%s') as updated_at,
              CONCAT(c.first_name, ' ', c.last_name) as contact_name,
              co.name as company_name,
              d.title as deal_title
@@ -148,7 +156,10 @@ class Activity {
   // Get upcoming activities
   static async getUpcoming(ownerId, limit = 10) {
     const sql = `
-      SELECT a.*, 
+      SELECT a.id, a.type, a.subject, a.description, a.status,
+             DATE_FORMAT(a.due_date, '%Y-%m-%dT%H:%i:%s') as due_date,
+             a.contact_id, a.company_id, a.owner_id,
+             DATE_FORMAT(a.created_at, '%Y-%m-%d %H:%i:%s') as created_at,
              CONCAT(c.first_name, ' ', c.last_name) as contact_name,
              co.name as company_name
       FROM activities a

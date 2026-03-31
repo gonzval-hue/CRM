@@ -28,8 +28,11 @@ export const Deals: React.FC = () => {
     try {
       const response: any = await api.get('/api/deals');
       // The API returns { success: true, data: [...] }
-      if (response && response.data) {
+      // If using axios interceptor that returns response.data, then we need response.data
+      if (response && response.success) {
         setDeals(response.data);
+      } else if (Array.isArray(response)) {
+        setDeals(response);
       }
     } catch (error) {
       console.error('Error fetching deals:', error);
@@ -107,17 +110,11 @@ export const Deals: React.FC = () => {
   const formatDate = (dateVal: any) => {
     if (!dateVal) return 'Sin fecha';
     try {
-      // Robust parsing for YYYY-MM-DD
-      const dateStr = String(dateVal);
-      if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
-        const [year, month, day] = dateStr.split(/[T ]/)[0].split('-');
-        const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        return d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
-      }
+      // If it's already a Date object (common with MariaDB driver)
+      const d = dateVal instanceof Date ? dateVal : new Date(String(dateVal).replace(' ', 'T'));
       
-      const d = new Date(dateStr.replace(' ', 'T'));
       if (isNaN(d.getTime())) return 'F. Inválida';
-      return d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+      return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
     } catch (error) {
       console.error('Date rendering error:', error);
       return 'F. Inválida';
