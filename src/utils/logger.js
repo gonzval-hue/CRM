@@ -1,5 +1,12 @@
 const winston = require('winston');
 const path = require('path');
+const fs = require('fs');
+
+// Crear carpeta de logs si no existe (crítico en producción/Hostinger)
+const logsDir = path.join(__dirname, '../../logs');
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
 
 // Custom log format
 const logFormat = winston.format.combine(
@@ -23,14 +30,14 @@ const logger = winston.createLogger({
     }),
     // File transport for errors
     new winston.transports.File({
-      filename: path.join('logs', 'error.log'),
+      filename: path.join(logsDir, 'error.log'),
       level: 'error',
       maxsize: 5242880, // 5MB
       maxFiles: 5,
     }),
     // File transport for all logs
     new winston.transports.File({
-      filename: path.join('logs', 'combined.log'),
+      filename: path.join(logsDir, 'combined.log'),
       maxsize: 5242880, // 5MB
       maxFiles: 5,
     }),

@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  // En producción: URL relativa ('') → misma URL del servidor (Hostinger)
+  // En desarrollo: el proxy de Vite redirige /api → localhost:3000
+  // Para sobreescribir, define VITE_API_URL en el .env del frontend
+  baseURL: import.meta.env.VITE_API_URL || '',
   headers: {
     'Content-Type': 'application/json',
   },

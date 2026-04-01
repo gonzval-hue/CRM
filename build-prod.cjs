@@ -7,6 +7,10 @@
  * 
  * Uso: npm run deploy
  * 
+ * ⚠️  VERSIÓN DE NODE EN HOSTINGER: usar Node 22.x (NO 18.x)
+ *     Node 18 causa 503 Service Unavailable en todas las rutas /api/*.
+ *     Configurar en: hPanel → Node.js → tu app → Build configuration → Node version: 22.x
+ * 
  * ⚠️  Las variables de entorno se configuran DIRECTAMENTE en el panel 
  *     de Hostinger. NO se incluye el archivo .env en el paquete.
  */
@@ -29,7 +33,7 @@ const BACKEND_TEMP = path.join(OUTPUT_DIR, '_backend_temp');
 const BACKEND_INCLUDE = [
   'src',           // Toda la lógica del backend (controllers, models, routes, etc.)
   'app.js',        // Entry point para Hostinger ← OBLIGATORIO
-  'package.json',
+  // package.json se genera limpio más abajo (sin scripts de dev)
   'package-lock.json',
 ];
 
@@ -117,6 +121,14 @@ fs.mkdirSync(BACKEND_TEMP, { recursive: true });
 console.log('\n▶  Empaquetando frontend.zip (para public_html/)...');
 const frontendZip = path.join(OUTPUT_DIR, 'frontend.zip');
 createZip(`${FRONTEND_DIST}${path.sep}*`, frontendZip);
+
+// Validar que el ZIP se creó correctamente
+if (!fs.existsSync(frontendZip)) {
+  console.error('\n❌ ERROR: No se pudo crear frontend.zip.');
+  console.error('   Causa más común: el servidor de desarrollo (npm run dev) está bloqueando');
+  console.error('   los archivos de dist/. Detiene el dev server antes de ejecutar npm run deploy.');
+  process.exit(1);
+}
 console.log('✓  frontend.zip creado.');
 
 // ── PASO 4: Integrar frontend compilado dentro del backend como /public ────────
@@ -138,6 +150,26 @@ for (const item of BACKEND_INCLUDE) {
     console.log(`   ⚠️  Advertencia: ${item} no encontrado, se omite.`);
   }
 }
+
+// ── PASO 5b: Generar package.json LIMPIO para el servidor ────────────────────
+// Hostinger ejecuta los scripts del package.json en el servidor.
+// Eliminamos scripts de desarrollo para evitar que intente correr build-prod.cjs.
+console.log('\n▶  Generando package.json limpio para producción...');
+const localPkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+const serverPkg = {
+  ...localPkg,
+  scripts: {
+    start: localPkg.scripts.start || 'node src/index.js',
+    // Script no-op: Hostinger puede intentar ejecutar 'deploy' como build command.
+    // Este script es inocuo y evita el error "Missing script: deploy".
+    deploy: 'echo Deploy runs locally, not on server.',
+  }
+};
+fs.writeFileSync(
+  path.join(BACKEND_TEMP, 'package.json'),
+  JSON.stringify(serverPkg, null, 2)
+);
+console.log('   ✓  package.json (scripts: solo start)');
 
 // ── PASO 6: Incluir script de migración SQL ────────────────────────────────────
 const upgradeSql = path.join(DATABASE_DIR, 'upgrade_prod_db.sql');
@@ -164,16 +196,17 @@ fs.rmSync(BACKEND_TEMP, { recursive: true }); // Limpiar carpeta temporal
 console.log('✓  backend.zip creado y carpeta temporal eliminada.');
 
 // ── RESUMEN FINAL ─────────────────────────────────────────────────────────────
-const frontendSize = (fs.statSync(frontendZip).size / 1024).toFixed(1);
-const backendSize  = (fs.statSync(backendZip).size  / 1024).toFixed(1);
+const getSize = (f) => fs.existsSync(f) ? `${(fs.statSync(f).size / 1024).toFixed(1)} KB` : '❌ No creado';
+const frontendSize = getSize(frontendZip);
+const backendSize  = getSize(backendZip);
 
 console.log('\n═══════════════════════════════════════════════════════');
 console.log('  ✅ PAQUETES LISTOS en /deploy_output/                ');
 console.log('═══════════════════════════════════════════════════════');
-console.log(`\n  🟢 frontend.zip  (${frontendSize} KB)`);
+console.log(`\n  🟢 frontend.zip  (${frontendSize})`);
 console.log('     → Subir en Hostinger File Manager');
 console.log('     → Extraer en: public_html/');
-console.log(`\n  🔵 backend.zip   (${backendSize} KB)`);
+console.log(`\n  🔵 backend.zip   (${backendSize})`);
 console.log('     → Subir en hPanel → Node.js → Settings & Redeploy');
 console.log('     → Hostinger ejecutará npm install y reiniciará la app');
 console.log('\n  ⚙️  Variables de entorno: configurar en el panel de Hostinger');
